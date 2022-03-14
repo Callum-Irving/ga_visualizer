@@ -1,24 +1,25 @@
 from random import randint, choice, random
+from time import sleep
 
 
 class Genome:
     x: int
     y: int
 
-    def __init__(self, xmax: int, ymax: int, random=False):
+    def __init__(self, x: int, y: int, random=False):
         """Create a new random genome."""
         if random:
-            self.x = randint(0, xmax)
-            self.y = randint(0, ymax)
+            self.x = randint(0, x)
+            self.y = randint(0, y)
         else:
-            self.x = xmax
-            self.y = ymax
+            self.x = x
+            self.y = y
 
 
 def fitness(guess: Genome, target: tuple[int, int]) -> float:
     """Return 1 / squared distance between vectors."""
-    xdist = guess.x - target[0]
-    ydist = guess.y - target[0]
+    xdist = max(0.1, guess.x - target[0])
+    ydist = max(0.1, guess.y - target[0])
 
     # a^2 + b^2 = c^2
     return 1 / (xdist**2 + ydist**2)
@@ -39,8 +40,12 @@ class Population:
         ty = randint(0, y)
         self.target = (tx, ty)
 
-    def do_generation(self, mut_rate=0.1, k=5, max_mut=5):
-        """Do a generation of evolution."""
+    def do_generation(self, mut_rate=0.1, k=5, max_mut=5) -> float:
+        """
+        Do a generation of evolution.
+
+        Returns mean fitness.
+        """
 
         # Do tournament selection
         newpop = []
@@ -66,7 +71,7 @@ class Population:
             if random() < 0.5:
                 child = Genome(p1.x, p2.y)
             else:
-                child = p1.copy()
+                child = p1
 
             newpop.append(child)
 
@@ -80,3 +85,18 @@ class Population:
                 point.y = max(0, point.y)
 
         self.points = newpop
+
+        sum = 0
+        for p in self.points:
+            sum += fitness(p, self.target)
+
+        return sum / len(self.points)
+
+
+if __name__ == "__main__":
+    pop = Population(100, 5000, 5000)
+    while True:
+        avg = pop.do_generation()
+        print("Average fitness:", avg)
+        sleep(0.1)
+    
