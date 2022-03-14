@@ -1,5 +1,6 @@
 from random import randint, choice, random
 from time import sleep
+import pygame
 
 
 class Genome:
@@ -18,14 +19,17 @@ class Genome:
 
 def fitness(guess: Genome, target: tuple[int, int]) -> float:
     """Return 1 / squared distance between vectors."""
-    xdist = max(0.1, guess.x - target[0])
-    ydist = max(0.1, guess.y - target[0])
+    # Make sure that neither distance is 0
+    xdist = max(0.9, abs(guess.x - target[0]))
+    ydist = max(0.9, abs(guess.y - target[1]))
 
     # a^2 + b^2 = c^2
     return 1 / (xdist**2 + ydist**2)
 
 
 class Population:
+    x: int
+    y: int
     points: list[Genome]
     target: tuple[int, int]
     generation: int
@@ -39,6 +43,10 @@ class Population:
         tx = randint(0, x)
         ty = randint(0, y)
         self.target = (tx, ty)
+
+        self.x = x
+        self.y = y
+
         self.generation = 0
 
     def do_generation(self, mut_rate=0.1, k=5, max_mut=5):
@@ -80,10 +88,10 @@ class Population:
         for point in newpop[1:]:
             if random() < mut_rate:
                 point.x += randint(-max_mut, max_mut)
-                point.x = max(0, point.x)
+                point.x = min(max(0, point.x), self.x)
             if random() < mut_rate:
                 point.y += randint(-max_mut, max_mut)
-                point.y = max(0, point.y)
+                point.y = min(max(0, point.y), self.y)
 
         self.points = newpop
         self.generation += 1
@@ -96,11 +104,41 @@ class Population:
         return sum / len(self.points)
 
 
+CELL_SIZE = 10
+
+
 if __name__ == "__main__":
-    pop = Population(100, 5000, 5000)
-    while True:
+    pop = Population(200, 100, 100)
+
+    pygame.init()
+    screen = pygame.display.set_mode([pop.x * CELL_SIZE, pop.y * CELL_SIZE])
+
+    running = True
+    while running:
+        for e in pygame.event.get():
+            if e.type == pygame.QUIT:
+                running = False
+
         avg = pop.avg_fitness()
         print("Generation:", pop.generation, "- Average fitness:", avg)
+
+        # Draw target
+        # Draw population
+        screen.fill((255, 255, 255))
+        for p in pop.points:
+            surf = pygame.Surface((CELL_SIZE, CELL_SIZE))
+            surf.set_alpha(64)
+            surf.fill((51, 153, 255))
+            screen.blit(surf, (p.x * CELL_SIZE, p.y * CELL_SIZE))
+        pygame.draw.circle(
+            screen,
+            (255, 0, 0),
+            (pop.target[0] * CELL_SIZE, pop.target[1] * CELL_SIZE),
+            CELL_SIZE / 2,
+        )
+        pygame.display.flip()
+
         pop.do_generation(0.1, 2, 1)
         sleep(0.1)
-    
+
+    pygame.quit()
