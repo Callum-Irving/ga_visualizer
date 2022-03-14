@@ -1,14 +1,18 @@
-from random import randint, choice
+from random import randint, choice, random
 
 
 class Genome:
     x: int
     y: int
 
-    def __init__(self, xmax: int, ymax: int):
+    def __init__(self, xmax: int, ymax: int, random=False):
         """Create a new random genome."""
-        self.x = randint(0, xmax)
-        self.y = randint(0, ymax)
+        if random:
+            self.x = randint(0, xmax)
+            self.y = randint(0, ymax)
+        else:
+            self.x = xmax
+            self.y = ymax
 
 
 def fitness(guess: Genome, target: tuple[int, int]) -> float:
@@ -29,18 +33,21 @@ class Population:
         """Create new population with `size` members."""
         self.points = []
         for _ in range(size):
-            self.points.append(Genome(x, y))
+            self.points.append(Genome(x, y, random=True))
 
         tx = randint(0, x)
         ty = randint(0, y)
         self.target = (tx, ty)
 
-    def do_generation(self, k=5):
+    def do_generation(self, mut_rate=0.1, k=5, max_mut=5):
         """Do a generation of evolution."""
 
         # Do tournament selection
         newpop = []
-        # TODO: Save best fitness
+        parents = []
+        best = max(self.points, key=lambda p: fitness(p, self.target))
+        newpop.append(best)
+        parents.append(best)
         for _ in range(len(self.points) // 2):
             # pick k points at random
             options = []
@@ -48,9 +55,28 @@ class Population:
                 options.append(choice(self.points))
 
             # Append the randomly selected point with greatest fitness
-            newpop.append(max(options, key=lambda p: fitness(p, self.target)))
+            parents.append(max(options, key=lambda p: fitness(p, self.target)))
 
-        # Do crossover
+        while len(newpop) < len(self.points):
+            # select random parents
+            p1 = choice(parents)
+            p2 = choice(parents)
+
+            # do crossover
+            if random() < 0.5:
+                child = Genome(p1.x, p2.y)
+            else:
+                child = p1.copy()
+
+            newpop.append(child)
 
         # Do mutation
-        pass
+        for point in newpop[1:]:
+            if random() < mut_rate:
+                point.x += randint(-max_mut, max_mut)
+                point.x = max(0, point.x)
+            if random() < mut_rate:
+                point.y += randint(-max_mut, max_mut)
+                point.y = max(0, point.y)
+
+        self.points = newpop
