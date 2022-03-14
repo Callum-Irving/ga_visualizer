@@ -97,6 +97,7 @@ class Population:
         self.generation += 1
 
     def avg_fitness(self) -> float:
+        """Compute the average fitness of the current population."""
         sum = 0
         for p in self.points:
             sum += fitness(p, self.target)
@@ -104,10 +105,8 @@ class Population:
         return sum / len(self.points)
 
 
-CELL_SIZE = 10
-
-
 if __name__ == "__main__":
+    CELL_SIZE = 10
     pop = Population(200, 100, 100)
 
     pygame.init()
@@ -119,10 +118,10 @@ if __name__ == "__main__":
             if e.type == pygame.QUIT:
                 running = False
 
+        # Log average fitness
         avg = pop.avg_fitness()
         print("Generation:", pop.generation, "- Average fitness:", avg)
 
-        # Draw target
         # Draw population
         screen.fill((255, 255, 255))
         for p in pop.points:
@@ -130,6 +129,8 @@ if __name__ == "__main__":
             surf.set_alpha(64)
             surf.fill((51, 153, 255))
             screen.blit(surf, (p.x * CELL_SIZE, p.y * CELL_SIZE))
+
+        # Draw target
         pygame.draw.circle(
             screen,
             (255, 0, 0),
@@ -138,6 +139,7 @@ if __name__ == "__main__":
         )
         pygame.display.flip()
 
+        # Evolve
         pop.do_generation(0.1, 2, 1)
         sleep(0.1)
 
