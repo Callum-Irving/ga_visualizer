@@ -1,4 +1,4 @@
-from random import randint
+from random import randint, choice
 
 
 class Genome:
@@ -22,6 +22,7 @@ def fitness(guess: Genome, target: tuple[int, int]) -> float:
 
 class Population:
     points: list[Genome]
+    target: tuple[int, int]
     generation: int
 
     def __init__(self, size: int, x: int, y: int):
@@ -30,6 +31,26 @@ class Population:
         for _ in range(size):
             self.points.append(Genome(x, y))
 
-    def do_generation(self):
-        # TODO
+        tx = randint(0, x)
+        ty = randint(0, y)
+        self.target = (tx, ty)
+
+    def do_generation(self, k=5):
+        """Do a generation of evolution."""
+
+        # Do tournament selection
+        newpop = []
+        # TODO: Save best fitness
+        for _ in range(len(self.points) // 2):
+            # pick k points at random
+            options = []
+            for _ in range(k):
+                options.append(choice(self.points))
+
+            # Append the randomly selected point with greatest fitness
+            newpop.append(max(options, key=lambda p: fitness(p, self.target)))
+
+        # Do crossover
+
+        # Do mutation
         pass
