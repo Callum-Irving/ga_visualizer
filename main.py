@@ -39,8 +39,9 @@ class Population:
         tx = randint(0, x)
         ty = randint(0, y)
         self.target = (tx, ty)
+        self.generation = 0
 
-    def do_generation(self, mut_rate=0.1, k=5, max_mut=5) -> float:
+    def do_generation(self, mut_rate=0.1, k=5, max_mut=5):
         """
         Do a generation of evolution.
 
@@ -85,7 +86,9 @@ class Population:
                 point.y = max(0, point.y)
 
         self.points = newpop
+        self.generation += 1
 
+    def avg_fitness(self) -> float:
         sum = 0
         for p in self.points:
             sum += fitness(p, self.target)
@@ -96,7 +99,8 @@ class Population:
 if __name__ == "__main__":
     pop = Population(100, 5000, 5000)
     while True:
-        avg = pop.do_generation()
-        print("Average fitness:", avg)
+        avg = pop.avg_fitness()
+        print("Generation:", pop.generation, "- Average fitness:", avg)
+        pop.do_generation(0.1, 2, 1)
         sleep(0.1)
     
