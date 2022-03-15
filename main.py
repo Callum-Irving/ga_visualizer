@@ -20,8 +20,8 @@ class Genome:
 def fitness(guess: Genome, target: tuple[int, int]) -> float:
     """Return 1 / squared distance between vectors."""
     # Make sure that neither distance is 0
-    xdist = max(0.9, abs(guess.x - target[0]))
-    ydist = max(0.9, abs(guess.y - target[1]))
+    xdist = max(0.1, abs(guess.x - target[0]))
+    ydist = max(0.1, abs(guess.y - target[1]))
 
     # a^2 + b^2 = c^2
     return 1 / (xdist**2 + ydist**2)
@@ -106,8 +106,8 @@ class Population:
 
 
 if __name__ == "__main__":
-    CELL_SIZE = 10
-    pop = Population(200, 100, 100)
+    CELL_SIZE = 8
+    pop = Population(400, 120, 120)
 
     pygame.init()
     screen = pygame.display.set_mode([pop.x * CELL_SIZE, pop.y * CELL_SIZE])
@@ -120,7 +120,7 @@ if __name__ == "__main__":
 
         # Log average fitness
         avg = pop.avg_fitness()
-        print("Generation:", pop.generation, "- Average fitness:", avg)
+        print("generation:", pop.generation, "- mean fitness:", avg)
 
         # Draw population
         screen.fill((255, 255, 255))
