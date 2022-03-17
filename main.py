@@ -106,7 +106,9 @@ if __name__ == "__main__":
     pop = Population(400, 120, 120)
 
     pygame.init()
+    pygame.font.init()
     screen = pygame.display.set_mode([pop.x * CELL_SIZE, pop.y * CELL_SIZE])
+    font = pygame.font.SysFont("Arial", 24)
 
     running = True
     while running:
@@ -133,6 +135,11 @@ if __name__ == "__main__":
             (pop.target[0] * CELL_SIZE, pop.target[1] * CELL_SIZE),
             CELL_SIZE / 2,
         )
+
+        # Display generation count in window
+        text = font.render("gen: " + str(pop.generation), True, (0, 0, 0))
+        screen.blit(text, (10, 10))
+
         pygame.display.flip()
 
         # Evolve
