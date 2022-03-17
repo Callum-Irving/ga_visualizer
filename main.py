@@ -16,15 +16,11 @@ class Genome:
             self.x = x
             self.y = y
 
-
-def fitness(guess: Genome, target: tuple[int, int]) -> float:
-    """Return 1 / squared distance between vectors."""
-    # Make sure that neither distance is 0
-    xdist = max(0.1, abs(guess.x - target[0]))
-    ydist = max(0.1, abs(guess.y - target[1]))
-
-    # a^2 + b^2 = c^2
-    return 1 / (xdist**2 + ydist**2)
+    def fitness(self, target: tuple[int, int]) -> float:
+        """Return the fitness of the genome."""
+        xdist = max(0.1, abs(self.x - target[0]))
+        ydist = max(0.1, abs(self.y - target[1]))
+        return 1 / (xdist**2 + ydist**2)
 
 
 class Population:
@@ -59,7 +55,7 @@ class Population:
         # Do tournament selection
         newpop = []
         parents = []
-        best = max(self.points, key=lambda p: fitness(p, self.target))
+        best = max(self.points, key=lambda p: p.fitness(self.target))
         newpop.append(best)
         parents.append(best)
         for _ in range(len(self.points) // 2):
@@ -69,7 +65,7 @@ class Population:
                 options.append(choice(self.points))
 
             # Append the randomly selected point with greatest fitness
-            parents.append(max(options, key=lambda p: fitness(p, self.target)))
+            parents.append(max(options, key=lambda p: p.fitness(self.target)))
 
         while len(newpop) < len(self.points):
             # select random parents
@@ -100,7 +96,7 @@ class Population:
         """Compute the average fitness of the current population."""
         sum = 0
         for p in self.points:
-            sum += fitness(p, self.target)
+            sum += p.fitness(self.target)
 
         return sum / len(self.points)
 
