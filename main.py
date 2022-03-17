@@ -140,6 +140,12 @@ if __name__ == "__main__":
         text = font.render("gen: " + str(pop.generation), True, (0, 0, 0))
         screen.blit(text, (10, 10))
 
+        # Display average fitness
+        text = font.render(
+            "mean fitness: " + str(round(pop.avg_fitness(), 2)), True, (0, 0, 0)
+        )
+        screen.blit(text, (10, 39))
+
         pygame.display.flip()
 
         # Evolve
