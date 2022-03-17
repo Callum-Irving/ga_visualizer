@@ -1,6 +1,10 @@
 from random import randint, choice, random
 from time import sleep
 import pygame
+from pygame.surface import Surface
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+from itertools import count
 
 
 class Genome:
@@ -101,55 +105,59 @@ class Population:
         return sum / len(self.points)
 
 
+CELL_SIZE = 8
+
+
+def draw_population(screen: Surface, pop: Population):
+    # Draw population
+    screen.fill((255, 255, 255))
+    for p in pop.points:
+        surf = pygame.Surface((CELL_SIZE, CELL_SIZE))
+        surf.set_alpha(64)
+        surf.fill((51, 153, 255))
+        screen.blit(surf, (p.x * CELL_SIZE, p.y * CELL_SIZE))
+
+    # Draw target
+    pygame.draw.circle(
+        screen,
+        (255, 0, 0),
+        (pop.target[0] * CELL_SIZE, pop.target[1] * CELL_SIZE),
+        CELL_SIZE / 2,
+    )
+
+    pygame.display.flip()
+
+
 if __name__ == "__main__":
-    CELL_SIZE = 8
     pop = Population(400, 120, 120)
 
     pygame.init()
     pygame.font.init()
     screen = pygame.display.set_mode([pop.x * CELL_SIZE, pop.y * CELL_SIZE])
-    font = pygame.font.SysFont("Arial", 24)
 
-    running = True
-    while running:
-        for e in pygame.event.get():
-            if e.type == pygame.QUIT:
-                running = False
+    index = count()
+    xs = []
+    ys = []
 
-        # Log average fitness
-        avg = pop.avg_fitness()
-        print("generation:", pop.generation, "- mean fitness:", avg)
+    def step(_):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
 
-        # Draw population
-        screen.fill((255, 255, 255))
-        for p in pop.points:
-            surf = pygame.Surface((CELL_SIZE, CELL_SIZE))
-            surf.set_alpha(64)
-            surf.fill((51, 153, 255))
-            screen.blit(surf, (p.x * CELL_SIZE, p.y * CELL_SIZE))
-
-        # Draw target
-        pygame.draw.circle(
-            screen,
-            (255, 0, 0),
-            (pop.target[0] * CELL_SIZE, pop.target[1] * CELL_SIZE),
-            CELL_SIZE / 2,
-        )
-
-        # Display generation count in window
-        text = font.render("gen: " + str(pop.generation), True, (0, 0, 0))
-        screen.blit(text, (10, 10))
-
-        # Display average fitness
-        text = font.render(
-            "mean fitness: " + str(round(pop.avg_fitness(), 2)), True, (0, 0, 0)
-        )
-        screen.blit(text, (10, 39))
-
-        pygame.display.flip()
-
-        # Evolve
         pop.do_generation(0.1, 2, 1)
-        sleep(0.1)
+        fitness = pop.avg_fitness()
+        xs.append(next(index))
+        ys.append(fitness)
+        plt.cla()
+        plt.xlabel("Generation")
+        plt.ylabel("Mean fitness")
+        plt.plot(xs, ys)
 
+        draw_population(screen, pop)
+
+    ani = FuncAnimation(plt.gcf(), step, interval=100)
+
+    plt.tight_layout()
+    plt.show()
     pygame.quit()
