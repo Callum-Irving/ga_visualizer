@@ -1,5 +1,4 @@
 from random import randint, choice, random
-from time import sleep
 import pygame
 from pygame.surface import Surface
 import matplotlib.pyplot as plt
