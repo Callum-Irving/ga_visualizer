@@ -1,6 +1,3 @@
-# By: Callum Irving
-
-
 from random import randint, choice, random
 from time import sleep
 import pygame
